@@ -2,6 +2,7 @@ package me.bubner.autohangup
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -60,7 +61,9 @@ class MainActivity : ComponentActivity() {
             )
         }
         // Optional permissions
-        if (!Manifest.permission.POST_NOTIFICATIONS.isPermissionGranted(this)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !Manifest.permission.POST_NOTIFICATIONS.isPermissionGranted(this)
+        ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS),

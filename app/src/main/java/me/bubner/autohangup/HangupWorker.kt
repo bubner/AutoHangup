@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.SystemClock
 import android.telecom.TelecomManager
 import android.util.Log
@@ -30,19 +31,20 @@ class HangupWorker(context: Context, parameters: WorkerParameters) :
     CoroutineWorker(context, parameters) {
 
     override suspend fun doWork(): Result {
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Auto Hangup",
-            NotificationManager.IMPORTANCE_LOW
-        )
         NotificationManagerCompat.from(applicationContext)
-            .createNotificationChannel(channel)
+            .createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID,
+                    "Auto Hangup",
+                    NotificationManager.IMPORTANCE_LOW
+                )
+            )
         try {
             setForeground(getForegroundInfo())
         } catch (e: IllegalStateException) {
             Log.e("AutoHangup", "Could not start app on foreground.", e)
         }
-        val targetMs = inputData.getLong("targetMs", -1L)
+        val targetMs = inputData.getLong(MainActivity.WORK_UNIX_TARGET_MS, -1L)
         if (targetMs == -1L)
             return Result.failure()
         val notificationManager = NotificationManagerCompat.from(applicationContext)
@@ -99,11 +101,18 @@ class HangupWorker(context: Context, parameters: WorkerParameters) :
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(
-            NOTIFICATION_ID,
-            buildNotification(),
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-        )
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                NOTIFICATION_ID,
+                buildNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+            )
+        } else {
+            ForegroundInfo(
+                NOTIFICATION_ID,
+                buildNotification(),
+            )
+        }
     }
 
     private fun buildNotification(dtMs: Long = 0L) =
