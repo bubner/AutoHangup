@@ -65,6 +65,8 @@ fun Main(
             MaterialTheme.colorScheme.primary,
         animationSpec = tween(durationMillis = 100),
     )
+    val buttonTextColour =
+        if (active) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimary
 
     LaunchedEffect(dtMs) {
         // Copy state so the stop button will serve as an effective pause button
@@ -147,7 +149,7 @@ fun Main(
                         .size(width = 200.dp, height = 60.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = buttonColour,
-                        contentColor = if (active) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimary
+                        contentColor = buttonTextColour
                     )
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -178,7 +180,8 @@ fun Main(
                 Text(
                     "Auto Hangup will attempt to disconnect phone operations after the timer has elapsed.",
                     fontSize = 12.sp,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    lineHeight = 16.sp
                 )
             }
         }
